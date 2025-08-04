@@ -15,6 +15,7 @@ const CalendarLayout = ({
   setSelectedMembers
 }) => {
   const [isSidePanelOpen, setisSidePanelOpen] = useState(true); // Always open by default
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const toggleSidePanel = () => {
     console.log('Toggle side panel called, current state:', isSidePanelOpen);
     setisSidePanelOpen((prev) => !prev);
@@ -28,7 +29,10 @@ const CalendarLayout = ({
 
   return (
     <>
-      <Sidebar onCalendarIconClick={handleCalendarIconClick} />
+      <Sidebar 
+        onCalendarIconClick={handleCalendarIconClick} 
+        onSidebarStateChange={setSidebarExpanded}
+      />
 
       {/* Entire right area: SidePanel + Topbar+CalendarGrid together */}
       <div className="flex-1 flex overflow-hidden h-screen">
@@ -42,6 +46,7 @@ const CalendarLayout = ({
               selectedMembers={selectedMembers}
               setSelectedMembers={setSelectedMembers}
               onBackArrowClick={toggleSidePanel}
+              sidebarExpanded={sidebarExpanded}
             />
           )}
         </div>

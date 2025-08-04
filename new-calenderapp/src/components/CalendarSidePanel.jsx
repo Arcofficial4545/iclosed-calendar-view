@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import EventsDropdown from "./EventsDropdown"
-const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowClick }) => {
+const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowClick, sidebarExpanded }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentOption, setCurrentOption] = useState('My Schedule');
   const [searchValue, setSearchValue] = useState('');
@@ -45,6 +46,9 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
   );
 
   const handleMouseEnter = () => {
+    console.log('Sidebar expanded:', sidebarExpanded);
+    const popupLeft = sidebarExpanded ? '280px' : '239px';
+    console.log('Popup position:', popupLeft);
     setShowAvailabilityPopup(true);
   };
 
@@ -56,8 +60,10 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
     setIsSpecificEventSelected(hasSpecificEvent);
   };
 
-  return (
-    <div className="w-full bg-white py-4 h-full overflow-y-auto min-w-0">
+
+
+     return (
+     <div className="w-full bg-white py-4 h-full overflow-y-auto min-w-0 relative">
       <div className="flex items-center mb-3  mt-4 pb-3 border-b border-gray-200 min-w-0">
         <div className="flex items-center flex-shrink-0">
         <svg 
@@ -252,48 +258,56 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
           </div>
                           </div>
                 </div>
-         {/* Avaliblity popup code*/}
-                                                {showAvailabilityPopup && (
-                  <div className="fixed bg-gray-900 rounded-md shadow-lg min-w-55 text-white" style={{
-                    zIndex: 999999999,
-                    left: '239px',
-                    top: '370px'
-                  }}>
-                    <div className="text-sm font-medium text-center p-3 bg-gray-700 rounded-t-md">Default availability</div>
-                                         <div className="p-3 relative">
-                       <div className="absolute left-1/5 top-0 bottom-0 w-px bg-gray-600 transform -translate-x-1/2"></div>
-                                               <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
-                          <span className="text-xs">Mon</span>
-                          <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
-                        </div>
-                        <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
-                          <span className="text-xs">Tue</span>
-                          <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
-                        </div>
-                        <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
-                          <span className="text-xs">Wed</span>
-                          <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
-                        </div>
-                        <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
-                          <span className="text-xs">Thu</span>
-                          <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
-                        </div>
-                        <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
-                          <span className="text-xs">Fri</span>
-                          <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
-                        </div>
-                        <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
-                          <span className="text-xs">Sat</span>
-                          <span className="text-xs col-span-4 text-center">-</span>
-                        </div>
-                        <div className="grid grid-cols-5">
-                          <span className="text-xs">Sun</span>
-                          <span className="text-xs col-span-4 text-center">-</span>
-                        </div>
-                     </div>
-                    <div className="absolute -left-1 top-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
-                  </div>
-                )}
+                  {/* Availability popup code*/}
+         {showAvailabilityPopup && createPortal(
+           <div 
+             className="fixed bg-gray-900 rounded-md shadow-lg min-w-55 text-white opacity-100" 
+                           style={{
+                zIndex: 9999999999,
+                left: sidebarExpanded ? '280px' : '239px',
+                top: '370px',
+                visibility: 'visible',
+                display: 'block',
+                position: 'fixed',
+                pointerEvents: 'auto'
+              }}
+           >
+                     <div className="text-sm font-medium text-center p-3 bg-gray-700 rounded-t-md">Default availability</div>
+                                          <div className="p-3 relative">
+                        <div className="absolute left-1/5 top-0 bottom-0 w-px bg-gray-600 transform -translate-x-1/2"></div>
+                                                <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
+                           <span className="text-xs">Mon</span>
+                           <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
+                         </div>
+                         <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
+                           <span className="text-xs">Tue</span>
+                           <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
+                         </div>
+                         <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
+                           <span className="text-xs">Wed</span>
+                           <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
+                         </div>
+                         <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
+                           <span className="text-xs">Thu</span>
+                           <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
+                         </div>
+                         <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
+                           <span className="text-xs">Fri</span>
+                           <span className="text-xs col-span-4 text-center">9 AM - 5 PM</span>
+                         </div>
+                         <div className="grid grid-cols-5 border-b border-gray-600 pb-2 mb-2">
+                           <span className="text-xs">Sat</span>
+                           <span className="text-xs col-span-4 text-center">-</span>
+                         </div>
+                         <div className="grid grid-cols-5">
+                           <span className="text-xs">Sun</span>
+                           <span className="text-xs col-span-4 text-center">-</span>
+                         </div>
+                      </div>
+                     <div className="absolute -left-1 top-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                   </div>,
+           document.body
+         )}
        </div>
      );
    };

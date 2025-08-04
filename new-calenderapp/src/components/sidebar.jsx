@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Sidebar = ({ onCalendarIconClick }) => {
+const Sidebar = ({ onCalendarIconClick, onSidebarStateChange }) => {
   const [currentActive, setCurrentActive] = useState("calendar");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -27,7 +27,10 @@ const Sidebar = ({ onCalendarIconClick }) => {
     }
 
     if (iconId === "collapse") {
-      setSidebarOpen(!sidebarOpen);
+      const newState = !sidebarOpen;
+      setSidebarOpen(newState);
+      console.log('Sidebar state changed to:', newState);
+      onSidebarStateChange?.(newState);
     }
   };
 
@@ -41,7 +44,8 @@ const Sidebar = ({ onCalendarIconClick }) => {
         sidebarOpen ? 'w-64 px-4 items-start justify-start' : 'w-16 items-center justify-start'
       }`}
       style={{
-        background: 'linear-gradient(135deg, #13255D 0%, #04012A 100%)'
+        background: 'linear-gradient(135deg, #13255D 0%, #04012A 100%)',
+        zIndex: 1
       }}
     >
       {/* Logo and Top Icons */}

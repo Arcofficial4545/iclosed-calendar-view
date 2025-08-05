@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 
 const RescheduleModal = ({ isOpen, onClose, onConfirm, event }) => {
+  // Simple state variables
   const [rescheduleOption, setRescheduleOption] = useState('manual');
   const [selectedCloser, setSelectedCloser] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
 
   if (!isOpen || !event) return null;
 
+  // Simple function to handle confirm
   const handleConfirm = () => {
     onConfirm({ option: rescheduleOption, closer: selectedCloser });
     setSelectedCloser('');
     setRescheduleOption('manual');
   };
 
+  // Simple function to handle close
   const handleClose = () => {
     setSelectedCloser('');
     setRescheduleOption('manual');
@@ -20,15 +23,16 @@ const RescheduleModal = ({ isOpen, onClose, onConfirm, event }) => {
     onClose();
   };
 
+  // Simple array of closers
   const closers = ['Closer 1', 'Closer 2', 'Closer 3'];
 
   return (
     <>
       {/* Modal */}
-             <div 
-         className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl border border-gray-200 z-60 min-w-[300px] max-w-[350px]"
-         onClick={(e) => e.stopPropagation()}
-       >
+      <div 
+        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl border border-gray-200 z-60 min-w-[300px] max-w-[350px]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-bold text-gray-900">Reschedule Call</h2>

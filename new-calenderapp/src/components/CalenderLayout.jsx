@@ -14,17 +14,18 @@ const CalendarLayout = ({
   selectedMembers,
   setSelectedMembers
 }) => {
-  const [isSidePanelOpen, setisSidePanelOpen] = useState(true); // Always open by default
+  // Simple state variables
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(true);
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  
+  // Simple function to toggle side panel
   const toggleSidePanel = () => {
-    console.log('Toggle side panel called, current state:', isSidePanelOpen);
-    setisSidePanelOpen((prev) => !prev);
+    setIsSidePanelOpen(!isSidePanelOpen);
   };
   
+  // Simple function to handle calendar icon click
   const handleCalendarIconClick = () => {
-    // When calendar icon is clicked, always ensure side panel is open
-    console.log('Calendar icon clicked - setting side panel to open');
-    setisSidePanelOpen(true);
+    setIsSidePanelOpen(true);
   };
 
   return (
@@ -34,9 +35,9 @@ const CalendarLayout = ({
         onSidebarStateChange={setSidebarExpanded}
       />
 
-      {/* Entire right area: SidePanel + Topbar+CalendarGrid together */}
+      {/* Main content area */}
       <div className="flex-1 flex overflow-hidden h-screen">
-        {/* Side Panel (full height) */}
+        {/* Side Panel */}
         <div
           className={`transition-all duration-300 bg-white border-r border-gray-100
             ${isSidePanelOpen ? 'w-80' : 'w-0'} overflow-hidden`}
@@ -51,7 +52,7 @@ const CalendarLayout = ({
           )}
         </div>
 
-        {/* Topbar and CalendarGrid shrink together */}
+        {/* Calendar area */}
         <div className="flex flex-col flex-1 overflow-hidden min-w-0">
           <Topbar
             currentDate={currentDate}

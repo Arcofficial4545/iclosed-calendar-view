@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 
 const Sidebar = ({ onCalendarIconClick, onSidebarStateChange }) => {
+  // Simple state variables
   const [currentActive, setCurrentActive] = useState("calendar");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Simple arrays for icons
   const topIcons = [
     { file: "1.svg", id: "collapse", label: "collapse" },
     { file: "calendar2.svg", id: "calendar", label: "AI Schedular" },
@@ -19,21 +21,22 @@ const Sidebar = ({ onCalendarIconClick, onSidebarStateChange }) => {
     { file: "cog9.svg", id: "settings", label: "Settings" }
   ];
 
+  // Simple function to handle icon clicks
   const handleIconClick = (iconId) => {
     setCurrentActive(iconId);
 
     if (iconId === "calendar") {
-      onCalendarIconClick?.();
+      onCalendarIconClick();
     }
 
     if (iconId === "collapse") {
       const newState = !sidebarOpen;
       setSidebarOpen(newState);
-      console.log('Sidebar state changed to:', newState);
-      onSidebarStateChange?.(newState);
+      onSidebarStateChange(newState);
     }
   };
 
+  // Simple function to handle bottom icon clicks
   const handleBottomIconClick = (iconId) => {
     setCurrentActive(iconId);
   };

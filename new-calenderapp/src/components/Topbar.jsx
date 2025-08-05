@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { startOfWeek, addDays, format, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isWithinInterval } from 'date-fns'
 import TimezoneBar from './TimezoneBar'
 
 const Topbar = ({
@@ -10,65 +9,140 @@ const Topbar = ({
   timezone,
   setTimezone
 }) => {
-  const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 })
-  const weekEnd = addDays(weekStart, 6)
+  // Simple state variables
   const [showCalendar, setShowCalendar] = useState(false)
   const [calendarMonth, setCalendarMonth] = useState(currentDate)
 
-  useEffect(() => {
-    const updateClock = () => {
-      const now = new Date().toLocaleTimeString('en-US', {
-        timeZone: timezone,
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      })
-    }
-    updateClock()
-    const interval = setInterval(updateClock, 60000)
-    return () => clearInterval(interval)
-  }, [timezone])
+  // Simple function to get week start
+  const getWeekStart = (date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const result = new Date(date);
+    result.setDate(result.getDate() - day);
+    return result;
+  };
 
+  // Simple function to add days
+  const addDays = (date, days) => {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  };
+
+  // Simple function to format date
+  const formatDate = (date) => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${month} ${year}`;
+  };
+
+  // Format date range to match design (Jan 19 to Jan 25, 2025)
+  const formatShortDate = (date) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${month} ${day}`;
+  };
+
+  // Get year for date range display
+  const getDateRangeYear = () => {
+    const year = weekEnd.getFullYear();
+    return year;
+  };
+
+  // Calculate week start and end
+  const weekStart = getWeekStart(currentDate);
+  const weekEnd = addDays(weekStart, 6);
+
+  // Simple function to handle previous week
   const handlePreviousWeek = () => {
-    const newDate = subWeeks(currentDate, 1)
-    setCurrentDate(newDate)
-    setCalendarMonth(newDate)
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 7);
+    setCurrentDate(newDate);
+    setCalendarMonth(newDate);
   }
 
+  // Simple function to handle next week
   const handleNextWeek = () => {
-    const newDate = addWeeks(currentDate, 1)
-    setCurrentDate(newDate)
-    setCalendarMonth(newDate)
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 7);
+    setCurrentDate(newDate);
+    setCalendarMonth(newDate);
   }
 
+  // Simple function to handle previous month
   const handlePreviousMonth = () => {
-    setCalendarMonth(subWeeks(calendarMonth, 1))
+    const newDate = new Date(calendarMonth);
+    newDate.setMonth(newDate.getMonth() - 1);
+    setCalendarMonth(newDate);
   }
 
+  // Simple function to handle next month
   const handleNextMonth = () => {
-    setCalendarMonth(addWeeks(calendarMonth, 1))
+    const newDate = new Date(calendarMonth);
+    newDate.setMonth(newDate.getMonth() + 1);
+    setCalendarMonth(newDate);
   }
 
+  // Simple function to handle date selection
   const handleDateSelect = (date) => {
-    setCurrentDate(date)
-    setShowCalendar(false)
+    setCurrentDate(date);
+    setShowCalendar(false);
   }
 
+  // Simple function to check if date is in selected range
   const isDateInSelectedRange = (date) => {
-    return isWithinInterval(date, { start: weekStart, end: weekEnd })
+    return date >= weekStart && date <= weekEnd;
   }
 
+  // Simple function to check if date is today
   const isCurrentDay = (date) => {
-    return isSameDay(date, new Date())
+    const today = new Date();
+    return date.getDate() === today.getDate() && 
+           date.getMonth() === today.getMonth() && 
+           date.getFullYear() === today.getFullYear();
   }
 
+  // Simple function to check if date is in current month
+  const isSameMonth = (date1, date2) => {
+    return date1.getMonth() === date2.getMonth() && 
+           date1.getFullYear() === date2.getFullYear();
+  }
+
+  // Simple function to get all days in month
+  const getDaysInMonth = (year, month) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  // Simple function to render calendar
   const renderCalendar = () => {
-    const monthStart = startOfMonth(calendarMonth)
-    const monthEnd = endOfMonth(calendarMonth)
-    const startDate = startOfWeek(monthStart, { weekStartsOn: 0 })
-    const endDate = startOfWeek(monthEnd, { weekStartsOn: 6 })
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
     
-    const days = eachDayOfInterval({ start: startDate, end: endDate })
+    // Get first day of month
+    const firstDay = new Date(year, month, 1);
+    const firstDayOfWeek = firstDay.getDay();
+    
+    // Get last day of month
+    const lastDay = new Date(year, month, getDaysInMonth(year, month));
+    const lastDayOfWeek = lastDay.getDay();
+    
+    // Calculate start and end dates for calendar grid
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDayOfWeek);
+    
+    const endDate = new Date(lastDay);
+    endDate.setDate(endDate.getDate() + (6 - lastDayOfWeek));
+    
+    // Create array of all days to display
+    const days = [];
+    const current = new Date(startDate);
+    while (current <= endDate) {
+      days.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
 
     return (
       <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 min-w-[280px]">
@@ -82,8 +156,8 @@ const Topbar = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className="text-sm font-medium text-gray-900">
-            {format(calendarMonth, 'MMMM yyyy')}
+          <span className="text-sm font-semibold text-gray-900">
+            {formatDate(calendarMonth)}
           </span>
           <button
             onClick={handleNextMonth}
@@ -107,9 +181,9 @@ const Topbar = ({
         {/* Calendar Grid */}
         <div className="grid grid-cols-7 p-3">
           {days.map((day, index) => {
-            const isSelected = isDateInSelectedRange(day)
-            const isToday = isCurrentDay(day)
-            const isCurrentMonth = isSameMonth(day, calendarMonth)
+            const isSelected = isDateInSelectedRange(day);
+            const isToday = isCurrentDay(day);
+            const isCurrentMonth = isSameMonth(day, calendarMonth);
             
             return (
               <button
@@ -125,7 +199,7 @@ const Topbar = ({
                   backgroundColor: isSelected ? '#E1EFFE' : 'transparent'
                 }}
               >
-                {format(day, 'd')}
+                {day.getDate()}
                 {isToday && (
                   <div className="absolute -bottom-0.5 w-1 h-1 bg-blue-600 rounded-full"></div>
                 )}
@@ -141,7 +215,7 @@ const Topbar = ({
     <div className="flex items-center px-4 py-3 border-b border-gray-100 bg-white min-w-0">
       {/* LEFT side: Month/Year title + arrows + calendar */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        <div className="text-lg font-semibold text-gray-900">{format(currentDate, 'MMMM yyyy')}</div>
+        <div className="text-lg font-semibold text-gray-900">{formatDate(currentDate)}</div>
 
         <button
           onClick={handlePreviousWeek}
@@ -155,10 +229,13 @@ const Topbar = ({
         <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowCalendar(!showCalendar)}
-            className="px-4 py-2 border rounded-md text-sm bg-white hover:bg-gray-50 whitespace-nowrap text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-6 py-2 border rounded-md text-sm bg-white hover:bg-gray-50 whitespace-nowrap text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[200px] font-medium"
             style={{ borderColor: '#D1D5DB' }}
           >
-            {format(weekStart, 'MMM d')} to {format(weekEnd, 'MMM d, yyyy')}
+            <span className="text-gray-900 font-semibold">{formatShortDate(weekStart)}</span>
+            <span className="text-gray-500 mx-1 font-medium">to</span>
+            <span className="text-gray-900 font-semibold">{formatShortDate(weekEnd)}</span>
+            <span className="text-gray-900 ml-1 font-semibold">, {getDateRangeYear()}</span>
           </button>
 
           {showCalendar && renderCalendar()}

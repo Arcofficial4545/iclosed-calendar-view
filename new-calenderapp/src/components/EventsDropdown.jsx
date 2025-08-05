@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 
 const EventsDropdown = ({ onEventSelectionChange }) => {
+  // Simple state variables
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [selectedEvents, setSelectedEvents] = useState(['All events']);
 
+  // Simple array of events
   const events = [
     { name: 'All events', description: '' },
     { name: 'Team Standup', description: 'Random event 1 for this month' },
@@ -15,42 +17,99 @@ const EventsDropdown = ({ onEventSelectionChange }) => {
     { name: 'Technical Discussion', description: 'Random event 6 for this month' }
   ];
 
-  const filteredEvents = events.filter(event =>
-    event.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // Simple function to filter events
+  const getFilteredEvents = () => {
+    const filtered = [];
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+      if (event.name.toLowerCase().includes(searchText.toLowerCase())) {
+        filtered.push(event);
+      }
+    }
+    return filtered;
+  };
 
+  const filteredEvents = getFilteredEvents();
+
+  // Simple function to handle event click
   const handleEventClick = (eventName) => {
     if (eventName === 'All events') {
       setSelectedEvents(['All events']);
-      onEventSelectionChange?.(false); // No specific event selected
+      onEventSelectionChange(false);
     } else {
-      let newSelection = selectedEvents.filter(e => e !== 'All events');
+      let newSelection = [];
+      
+      // Remove 'All events' from selection
+      for (let i = 0; i < selectedEvents.length; i++) {
+        if (selectedEvents[i] !== 'All events') {
+          newSelection.push(selectedEvents[i]);
+        }
+      }
 
-      if (selectedEvents.includes(eventName)) {
-        newSelection = newSelection.filter(e => e !== eventName);
+      // Check if event is already selected
+      let isAlreadySelected = false;
+      for (let i = 0; i < newSelection.length; i++) {
+        if (newSelection[i] === eventName) {
+          isAlreadySelected = true;
+          break;
+        }
+      }
+
+      if (isAlreadySelected) {
+        // Remove event from selection
+        const updatedSelection = [];
+        for (let i = 0; i < newSelection.length; i++) {
+          if (newSelection[i] !== eventName) {
+            updatedSelection.push(newSelection[i]);
+          }
+        }
+        newSelection = updatedSelection;
+        
         if (newSelection.length === 0) {
           newSelection = ['All events'];
-          onEventSelectionChange?.(false); // No specific event selected
+          onEventSelectionChange(false);
         } else {
-          onEventSelectionChange?.(true); // Specific event(s) selected
+          onEventSelectionChange(true);
         }
       } else {
+        // Add event to selection
         newSelection.push(eventName);
-        onEventSelectionChange?.(true); // Specific event(s) selected
+        onEventSelectionChange(true);
       }
 
       setSelectedEvents(newSelection);
     }
   };
 
+  // Simple function to get display text
   const getDisplayText = () => {
-    if (selectedEvents.includes('All events')) {
+    let hasAllEvents = false;
+    for (let i = 0; i < selectedEvents.length; i++) {
+      if (selectedEvents[i] === 'All events') {
+        hasAllEvents = true;
+        break;
+      }
+    }
+    
+    if (hasAllEvents) {
       return 'All events';
     }
+    
     if (selectedEvents.length === 1) {
       return selectedEvents[0];
     }
+    
     return `${selectedEvents.length} events selected`;
+  };
+
+  // Simple function to check if event is selected
+  const isEventSelected = (eventName) => {
+    for (let i = 0; i < selectedEvents.length; i++) {
+      if (selectedEvents[i] === eventName) {
+        return true;
+      }
+    }
+    return false;
   };
 
   return (
@@ -94,8 +153,8 @@ const EventsDropdown = ({ onEventSelectionChange }) => {
 
                   {event.name === 'All events' ? (
                     <div className="flex items-start gap-3">
-                      <div className={`w-4 h-4 mt-1 rounded-full border-2 flex items-center justify-center ${selectedEvents.includes(event.name) ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}`}>
-                        {selectedEvents.includes(event.name) && (
+                      <div className={`w-4 h-4 mt-1 rounded-full border-2 flex items-center justify-center ${isEventSelected(event.name) ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'}`}>
+                        {isEventSelected(event.name) && (
                           <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                         )}
                       </div>
@@ -105,8 +164,8 @@ const EventsDropdown = ({ onEventSelectionChange }) => {
                     </div>
                   ) : (
                     <div className="flex items-start gap-3">
-                      <div className={`w-5 h-5 mt-0.5 rounded-full border-2 flex items-center justify-center ${selectedEvents.includes(event.name) ? 'border-blue-600' : 'border-gray-300'} bg-white`}>
-                        {selectedEvents.includes(event.name) && (
+                      <div className={`w-5 h-5 mt-0.5 rounded-full border-2 flex items-center justify-center ${isEventSelected(event.name) ? 'border-blue-600' : 'border-gray-300'} bg-white`}>
+                        {isEventSelected(event.name) && (
                           <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>
                         )}
                       </div>

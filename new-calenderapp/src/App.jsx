@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import CalendarLayout from './components/CalenderLayout'
-import { addDays } from 'date-fns'
+
+// Simple list of all members
 const allMembers = [
   "zack.bing@gmail.com",
   "jane.doe@gmail.com",
@@ -8,17 +9,22 @@ const allMembers = [
 ];
 
 function App() {
-  // Use the actual current date so current day highlighting works dynamically
+  // Simple state variables
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedMembers, setSelectedMembers] = useState(allMembers);
   const [timezone, setTimezone] = useState('Asia/Karachi')
 
+  // Simple functions to go to previous and next week
   const goToPreviousWeek = () => {
-    setCurrentDate(prev => addDays(prev, -7))
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 7);
+    setCurrentDate(newDate);
   }
 
   const goToNextWeek = () => {
-    setCurrentDate(prev => addDays(prev, 7))
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 7);
+    setCurrentDate(newDate);
   }
 
   return (
@@ -30,7 +36,7 @@ function App() {
         goToNextWeek={goToNextWeek}
         timezone={timezone}
         setTimezone={setTimezone}
-         selectedMembers={selectedMembers}
+        selectedMembers={selectedMembers}
         setSelectedMembers={setSelectedMembers}
       />
     </div>

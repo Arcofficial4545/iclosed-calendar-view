@@ -12,110 +12,101 @@ const EventDetailPopup = ({
   onEdit,
   position = { x: 0, y: 0 },
 }) => {
+  // Simple state variables
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
 
   if (!isOpen || !event) return null;
 
-  // Determine current status and toggle action
-  const isBusy = event.status === "busy" || !event.status; // Default to busy if no status
+  // Simple function to determine status
+  const isBusy = event.status === "busy" || !event.status;
   const statusText = isBusy ? "Busy" : "Available";
   const buttonText = isBusy ? "Mark available" : "Mark busy";
   const statusColor = isBusy ? "bg-red-500" : "bg-green-500";
 
+  // Simple function to handle delete click
   const handleDeleteClick = () => {
     setShowDeleteDialog(true);
   };
 
+  // Simple function to handle delete confirm
   const handleDeleteConfirm = () => {
     onDelete();
     setShowDeleteDialog(false);
   };
 
+  // Simple function to handle delete cancel
   const handleDeleteCancel = () => {
     setShowDeleteDialog(false);
   };
 
+  // Simple function to handle cancel event
   const handleCancelEvent = () => {
     setShowCancelModal(true);
   };
 
+  // Simple function to handle cancel event confirm
   const handleCancelEventConfirm = (reason) => {
-    console.log('Event cancelled with reason:', reason);
-    // Delete the event (same as handleDeleteConfirm)
     onDelete();
     setShowCancelModal(false);
-    onClose(); // Close the main popup
+    onClose();
   };
 
+  // Simple function to handle cancel event close
   const handleCancelEventClose = () => {
     setShowCancelModal(false);
   };
 
+  // Simple function to handle reschedule event
   const handleRescheduleEvent = () => {
     setShowRescheduleModal(true);
   };
 
+  // Simple function to handle reschedule event confirm
   const handleRescheduleEventConfirm = (data) => {
-    console.log('Event rescheduled:', data);
-    // Here you would typically call an API to reschedule the event
     setShowRescheduleModal(false);
-    onClose(); // Close the main popup
+    onClose();
   };
 
+  // Simple function to handle reschedule event close
   const handleRescheduleEventClose = () => {
     setShowRescheduleModal(false);
   };
 
+  // Simple function to handle status toggle
   const handleStatusToggle = () => {
-    onMarkAvailable(); // This will toggle the status
+    onMarkAvailable();
   };
 
-  // Update the popup when status changes
-  const updatedEvent = { ...event };
-
+  // Simple function to get event type icon
   const getEventTypeIcon = (type, source) => {
-    // Return different icons based on event source
     if (source === "iclosed") {
-      // For iClosed events, return different icons based on type
       if (type === "workshop") {
         return "/icons/workshop-icon.svg";
       } else if (type === "session") {
         return "/icons/session-icon.svg";
       }
     }
-    // Default to calendar icon for Google events
     return "/icons/calendar-icon.svg";
   };
 
+  // Simple function to get event type color
   const getEventTypeColor = (type) => {
-    switch (type) {
-      case "meeting":
-        return "bg-emerald-500";
-      case "review":
-        return "bg-lime-500";
-      case "planning":
-        return "bg-blue-500";
-      case "triage":
-        return "bg-orange-500";
-      case "lunch":
-        return "bg-yellow-500";
-      case "demo":
-        return "bg-purple-500";
-      case "retro":
-        return "bg-indigo-500";
-      case "talk":
-        return "bg-pink-500";
-      case "workshop":
-        return "bg-blue-500";
-      case "session":
-        return "bg-orange-500";
-      default:
-        return "bg-gray-500";
-    }
+    if (type === "meeting") return "bg-emerald-500";
+    if (type === "review") return "bg-lime-500";
+    if (type === "planning") return "bg-blue-500";
+    if (type === "triage") return "bg-orange-500";
+    if (type === "lunch") return "bg-yellow-500";
+    if (type === "demo") return "bg-purple-500";
+    if (type === "retro") return "bg-indigo-500";
+    if (type === "talk") return "bg-pink-500";
+    if (type === "workshop") return "bg-blue-500";
+    if (type === "session") return "bg-orange-500";
+    return "bg-gray-500";
   };
 
+  // Simple function to get day name
   const getDayName = (day) => {
     const dayNames = [
       "Sunday",
@@ -129,6 +120,7 @@ const EventDetailPopup = ({
     return dayNames[day];
   };
 
+  // Simple function to get month name
   const getMonthName = () => {
     const months = [
       "January",
@@ -148,6 +140,7 @@ const EventDetailPopup = ({
     return months[currentDate.getMonth()];
   };
 
+  // Simple function to format time
   const formatTime = (hour) => {
     const date = new Date();
     date.setHours(hour, 0, 0, 0);
@@ -171,7 +164,7 @@ const EventDetailPopup = ({
         onClick={(e) => e.stopPropagation()}
       >
         {event.source === "iclosed" ? (
-          // iClosed Event Popup (New Figma Design)
+          // iClosed Event Popup
           <>
             {/* Header with colored vertical bar */}
             <div className="flex items-start justify-between p-4 border-b border-gray-100">
@@ -221,8 +214,8 @@ const EventDetailPopup = ({
                 onClick={handleCancelEvent}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <div className="w-4 h-4 rounded-full  flex items-center justify-center">
-                 <img
+                <div className="w-4 h-4 rounded-full flex items-center justify-center">
+                  <img
                     src='../../public/icons/delete.svg'
                     alt="delete"
                     className="w-5 h-5"
@@ -234,8 +227,8 @@ const EventDetailPopup = ({
                 onClick={handleRescheduleEvent}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <div className="w-4 h-4 rounded-full  flex items-center justify-center">
-                 <img
+                <div className="w-4 h-4 rounded-full flex items-center justify-center">
+                  <img
                     src='../../public/icons/refresh.svg'
                     alt="delete"
                     className="w-5 h-5"
@@ -243,11 +236,10 @@ const EventDetailPopup = ({
                 </div>
                 Reschedule
               </button>
-             
             </div>
           </>
         ) : (
-          // Google Event Popup (Original Design)
+          // Google Event Popup
           <>
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
@@ -297,18 +289,18 @@ const EventDetailPopup = ({
 
             {/* Action Buttons */}
             <div className="flex items-center justify-between p-4 border-t border-gray-100">
-           <button 
-             onClick={handleStatusToggle}
-             className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded border border-gray-200 hover:border-gray-300 transition-colors"
-           >
-  <div className="w-4 h-4 flex items-center justify-center">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"></circle>
-      <line x1="6.34" y1="6.34" x2="17.66" y2="17.66" stroke="currentColor" strokeWidth="2" strokeLinecap="round"></line>
-    </svg>
-  </div>
-  {buttonText}
-</button>
+              <button 
+                onClick={handleStatusToggle}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded border border-gray-200 hover:border-gray-300 transition-colors"
+              >
+                <div className="w-4 h-4 flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"></circle>
+                    <line x1="6.34" y1="6.34" x2="17.66" y2="17.66" stroke="currentColor" strokeWidth="2" strokeLinecap="round"></line>
+                  </svg>
+                </div>
+                {buttonText}
+              </button>
 
               <div className="flex items-center gap-2">
                 <button

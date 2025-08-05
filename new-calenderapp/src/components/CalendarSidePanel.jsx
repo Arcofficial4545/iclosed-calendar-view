@@ -9,6 +9,9 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
   const [filter, setFilter] = useState('Events');
   const [showAvailabilityPopup, setShowAvailabilityPopup] = useState(false);
   const [isSpecificEventSelected, setIsSpecificEventSelected] = useState(false);
+  const [showAvailabilityDropdown, setShowAvailabilityDropdown] = useState(false);
+  const [selectedAvailability, setSelectedAvailability] = useState('Default availabiliy');
+  const [availabilitySearchValue, setAvailabilitySearchValue] = useState('');
 
   const emails = [
     "zack.bing@gmail.com",
@@ -41,8 +44,18 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
 
   const filterOptions = ['Events', 'Meetings', 'Tasks'];
 
+  const availabilityOptions = [
+    { id: 'default', name: 'Default availabiliy', isDefault: true },
+    { id: 'long', name: 'Long name for availability sc...', isDefault: false },
+    { id: 'availability3', name: 'Availability 3', isDefault: false }
+  ];
+
   const searchResults = members.filter(member =>
     member.toLowerCase().includes(searchValue.toLowerCase())
+  );
+
+  const filteredAvailabilityOptions = availabilityOptions.filter(option =>
+    option.name.toLowerCase().includes(availabilitySearchValue.toLowerCase())
   );
 
   const handleMouseEnter = () => {
@@ -173,10 +186,9 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
                 </div>
                 <div 
                   className="px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-900" 
-                  onClick={() => {setFilter('Meetings'); setFilterOpen(false)}}
+                  onClick={() => {setFilter('Availability'); setFilterOpen(false)}}
                 >
-                  Meetings
-                </div>
+Availability                </div>
                 <div 
                   className="px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-900" 
                   onClick={() => {setFilter('Tasks'); setFilterOpen(false)}}
@@ -187,6 +199,115 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
             )}
           </div>
         </div>
+
+        {/* Availability Dropdown - Only show when "Availability" is selected */}
+        {filter === 'Availability' && (
+          <div className="min-w-0">
+            <label className="block mb-1 text-sm font-medium text-gray-900 whitespace-nowrap">Availability</label>
+            <div className="relative min-w-0">
+              <div 
+                className="w-full border border-blue-300 rounded-md px-3 py-2 text-sm cursor-pointer flex justify-between items-center bg-white min-w-0"
+                onClick={() => setShowAvailabilityDropdown(!showAvailabilityDropdown)}
+              >
+                <span className="text-gray-900 truncate">{selectedAvailability}</span>
+                <div className="flex items-center gap-2">
+                  <svg 
+                    className="w-4 h-4 text-gray-400 cursor-pointer" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <svg 
+                    className={`w-4 h-4 text-gray-500 flex-shrink-0 ${showAvailabilityDropdown ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+
+              {showAvailabilityDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                  <div className="p-3 border-b border-gray-100">
+                    <div className="flex items-center border border-gray-300 rounded-md px-3 py-2 bg-white">
+                      <svg className="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder="Search availability"
+                        value={availabilitySearchValue}
+                        onChange={(e) => setAvailabilitySearchValue(e.target.value)}
+                        className="flex-1 outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto">
+                    {filteredAvailabilityOptions.map((option, i) => (
+                      <div
+                        key={i}
+                        className="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+                        onClick={() => {
+                          setSelectedAvailability(option.name);
+                          setShowAvailabilityDropdown(false);
+                          setAvailabilitySearchValue('');
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <div className="w-4 h-4 border border-gray-300 rounded-full mr-3 flex items-center justify-center">
+                            {selectedAvailability === option.name && (
+                              <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                            )}
+                          </div>
+                                                     {option.isDefault && (
+                             <svg className="w-4 h-4 mr-2" fill="#6B7280" viewBox="0 0 20 20">
+                               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                             </svg>
+                           )}
+                          <span className="text-sm text-gray-900">{option.name}</span>
+                        </div>
+                        <svg 
+                          className="w-4 h-4 text-gray-400" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-3 border-t border-gray-100 flex justify-end gap-2">
+                    <button 
+                      className="px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50"
+                      onClick={() => {
+                        setShowAvailabilityDropdown(false);
+                        setAvailabilitySearchValue('');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                      onClick={() => {
+                        setShowAvailabilityDropdown(false);
+                        setAvailabilitySearchValue('');
+                      }}
+                    >
+                      Apply filter
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div>
          <EventsDropdown onEventSelectionChange={handleEventSelectionChange}/>

@@ -586,7 +586,7 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                 <style>{`div::-webkit-scrollbar { display: none; }`}</style>
                                  {timeSlots.map((hour, i) => (
                    <div key={i} className="w-20 h-18 flex-shrink-0 relative" style={{ overflow: 'visible', zIndex: 100 - i }}>
-                     <div className="w-20 h-full bg-white sticky left-0 relative" style={{ overflow: 'visible', zIndex: 44, paddingTop: '4px' }}>
+                     <div className="w-20 h-full bg-white sticky left-0 " style={{ overflow: 'visible', zIndex: 44, paddingTop: '4px' }}>
                        <span className="absolute text-sm font-medium whitespace-nowrap leading-none" style={{ bottom: '-7px', right: '32px', zIndex: 100, transform: 'translateY(-2px)', color: '#4B5563' }}>{formatTime(hour)}</span>
                      </div>
                      <div className="absolute bottom-0 right-0 w-full h-px" style={{ zIndex: 75 }}>
@@ -677,24 +677,31 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                    minWidth: '120px'
                                  };
 
-                                if (event.type === 'meeting') {
-                                  eventClasses += " bg-emerald-200 border border-emerald-300";
-                                } else if (event.type === 'review') {
-                                  eventClasses += " bg-lime-200 border border-lime-300";
-                                } else if (event.type === 'planning') {
-                                  eventClasses += " bg-blue-100 border border-blue-300";
-                                } else if (event.type === 'break') {
-                                  eventClasses += " bg-gray-100 border border-gray-300";
-                                } else if (event.type === 'triage') {
-                                  eventClasses += " bg-purple-100 border border-purple-300";
-                                } else if (event.type === 'lunch') {
-                                  eventClasses += " bg-yellow-100 border border-yellow-300";
-                                } else if (event.type === 'workshop') {
-                                  eventClasses += " bg-blue-200 border border-blue-300";
-                                } else if (event.type === 'session') {
-                                  eventClasses += " bg-orange-200 border border-orange-300";
+                                // Style based on source (google vs iclosed) instead of type
+                                if (event.source === 'google') {
+                                  // Google Calendar events: #F3F4F6 background with #D1D5DB border
+                                  eventStyle.backgroundColor = '#F3F4F6';
+                                  eventStyle.border = '1px solid #D1D5DB';
+                                } else if (event.source === 'iclosed') {
+                                  // iClosed events: alternate between orange and blue color schemes
+                                  // Use event type or title to determine which color scheme to use
+                                  const isOrangeScheme = event.type === 'workshop' || event.type === 'session' || event.title.includes('Workshop') || event.title.includes('Session');
+                                  
+                                  if (isOrangeScheme) {
+                                    // Orange scheme: #FFF0E5 background with left border #FF8630
+                                    eventStyle.backgroundColor = '#FFF0E5';
+                                    eventStyle.border = '1px solid #D1D5DB';
+                                    eventStyle.borderLeft = '3px solid #FF8630';
+                                  } else {
+                                    // Blue scheme: #EBF1FF background with left border #6F97FF
+                                    eventStyle.backgroundColor = '#EBF1FF';
+                                    eventStyle.border = '1px solid #D1D5DB';
+                                    eventStyle.borderLeft = '3px solid #6F97FF';
+                                  }
                                 } else {
-                                  eventClasses += " bg-indigo-100 border border-indigo-300";
+                                  // Default fallback
+                                  eventStyle.backgroundColor = '#F3F4F6';
+                                  eventStyle.border = '1px solid #D1D5DB';
                                 }
 
                                 return (
@@ -714,21 +721,15 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                            className="w-4 h-4 flex-shrink-0"
                                          />
                                        )}
-                                       <div className={`text-xs font-semibold overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0 ${
-                                         event.type === 'meeting' || event.type === 'review' || event.type === 'workshop' || event.type === 'session' ? 'text-gray-800' : 'text-gray-900'
-                                       }`}>
+                                       <div className="text-xs font-semibold overflow-hidden text-ellipsis whitespace-nowrap flex-1 min-w-0 text-gray-800">
                                          {event.title}
                                        </div>
                                      </div>
-                                    <div className={`text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap ${
-                                      event.type === 'meeting' || event.type === 'review' || event.type === 'workshop' || event.type === 'session' ? 'text-gray-600' : 'text-gray-500'
-                                    }`}>
+                                    <div className="text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap text-gray-600">
                                       {event.time}
                                     </div>
                                     {event.status && (
-                                      <div className={`text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap ${
-                                        event.type === 'meeting' || event.type === 'review' || event.type === 'workshop' || event.type === 'session' ? 'text-gray-600' : 'text-gray-500'
-                                      }`}>
+                                      <div className="text-xs leading-tight overflow-hidden text-ellipsis whitespace-nowrap text-gray-600">
                                         {event.status === 'busy' ? 'Busy' : 'Available'}
                                       </div>
                                     )}
@@ -758,10 +759,10 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                 dragPreview.invalid 
                                   ? 'border-red-400 bg-red-100 bg-opacity-30' 
                                   : dragPreview.source === 'iclosed'
-                                    ? dragPreview.type === 'workshop'
-                                      ? 'border-blue-300 bg-blue-200 bg-opacity-30'
-                                      : 'border-orange-300 bg-orange-200 bg-opacity-30'
-                                    : 'border-emerald-300 bg-emerald-200 bg-opacity-30'
+                                    ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
+                                      ? 'border-orange-300 bg-orange-100 bg-opacity-30'
+                                      : 'border-blue-300 bg-blue-100 bg-opacity-30'
+                                    : 'border-gray-300 bg-gray-100 bg-opacity-30'
                               }`}
                               style={{
                                 top: `${4 + (dragPreview.startMinutes || 0) * (cellHeight / 60)}px`,
@@ -789,10 +790,10 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                   dragPreview.invalid 
                                     ? 'text-red-700' 
                                     : dragPreview.source === 'iclosed'
-                                      ? dragPreview.type === 'workshop'
-                                        ? 'text-blue-800'
-                                        : 'text-orange-800'
-                                      : 'text-emerald-800'
+                                      ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
+                                        ? 'text-orange-800'
+                                        : 'text-blue-800'
+                                      : 'text-gray-800'
                                 }`}>
                                   {dragPreview.title}
                                 </div>
@@ -801,10 +802,10 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                 dragPreview.invalid 
                                   ? 'text-red-600' 
                                   : dragPreview.source === 'iclosed'
-                                    ? dragPreview.type === 'workshop'
-                                      ? 'text-blue-700'
-                                      : 'text-orange-700'
-                                    : 'text-emerald-700'
+                                    ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
+                                      ? 'text-orange-700'
+                                      : 'text-blue-700'
+                                    : 'text-gray-600'
                               }`}>
                                 {`${formatTime(dragPreview.startHour)}:${(dragPreview.startMinutes || 0).toString().padStart(2, '0')} - ${formatTime(dragPreview.endHour)}:${(dragPreview.endMinutes || 0).toString().padStart(2, '0')}`}
                               </div>
@@ -812,10 +813,10 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                 dragPreview.invalid 
                                   ? 'text-red-600' 
                                   : dragPreview.source === 'iclosed'
-                                    ? dragPreview.type === 'workshop'
-                                      ? 'text-blue-700'
-                                      : 'text-orange-700'
-                                    : 'text-emerald-700'
+                                    ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
+                                      ? 'text-orange-700'
+                                      : 'text-blue-700'
+                                    : 'text-gray-600'
                               }`}>
                                 {dragPreview.status === 'busy' ? 'Busy' : 'Available'}
                               </div>

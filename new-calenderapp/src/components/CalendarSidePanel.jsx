@@ -293,15 +293,18 @@ Availability                </div>
                     >
                       Cancel
                     </button>
-                    <button 
-                      className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                      onClick={() => {
-                        setShowAvailabilityDropdown(false);
-                        setAvailabilitySearchValue('');
-                      }}
-                    >
-                      Apply filter
-                    </button>
+                                         <button 
+                       className="px-4 py-2 text-sm text-white rounded-md hover:opacity-90"
+                       style={{ 
+                         background: 'linear-gradient(to right, #031953, #0236C2)'
+                       }}
+                       onClick={() => {
+                         setShowAvailabilityDropdown(false);
+                         setAvailabilitySearchValue('');
+                       }}
+                     >
+                       Apply filter
+                     </button>
                   </div>
                 </div>
               )}
@@ -353,7 +356,7 @@ Availability                </div>
           </>
         )}
 
-        <div>
+        <div className="border-t border-gray-200 pt-4">
           <h3 className="font-medium text-gray-900 text-sm mb-2">Connected calendar(s)</h3>
           <p className="text-xs text-gray-500 mb-3">Checking for scheduling conflicts. Enable or disable event visibility.</p>
           <div className="space-y-2">

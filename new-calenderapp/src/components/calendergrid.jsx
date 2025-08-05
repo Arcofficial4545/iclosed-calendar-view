@@ -850,12 +850,14 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
               
               return (
                                  <div key={dayIndex} className="border-r border-gray-100 px-2.5 py-3 bg-white w-full min-w-0">
-                   <div className="text-xs text-gray-500 whitespace-nowrap">
-                     Available slots:{' '}
-                                          <span className="font-semibold text-gray-700">
-                       {availableSlots[dayIndex]}
-                     </span>
-                   </div>
+                   {!isWeekend && (
+                     <div className="text-xs text-gray-500 whitespace-nowrap">
+                       Available slots:{' '}
+                       <span className="font-semibold text-gray-700">
+                         {availableSlots[dayIndex]}
+                       </span>
+                     </div>
+                   )}
                  </div>
               );
             })}

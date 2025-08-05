@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import EventDetailPopup from './EventDetailPopup';
 
 const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
@@ -146,7 +146,7 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
     }
     
     const minuteOffset = currentMinutes / 60;
-    const position = (hourIndex + minuteOffset) * 72 + 36;
+    const position = (hourIndex + minuteOffset) * 72 + 72;
     
     return position;
   };
@@ -158,10 +158,10 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
     daysOfWeek.push(addDays(weekStart, i));
   }
   
-  const timeSlots = [];
-  for (let i = 0; i < 24; i++) {
-    timeSlots.push((9 + i) % 24);
-  }
+     const timeSlots = [];
+   for (let i = 0; i < 24; i++) {
+     timeSlots.push(9 + i);
+   }
 
   const today = new Date();
   const todayDateString = today.toDateString();
@@ -498,7 +498,17 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
 
   // Simple variables for rendering
   const cellHeight = 72;
-  const timePosition = getCurrentTimePosition();
+  const [currentTimeState, setCurrentTimeState] = useState(new Date());
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTimeState(new Date());
+    }, 1000); // Update every second
+    
+    return () => clearInterval(timer);
+  }, []);
+  
+  const timePosition = useMemo(() => getCurrentTimePosition(), [currentTimeState, timezone]);
   const todayColumnIndex = daysOfWeek.findIndex(day => day.toDateString() === todayDateString);
   const isToday = daysOfWeek.some(day => day.toDateString() === todayDateString);
 
@@ -564,7 +574,7 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
           </div>
 
           <div className="flex-1 flex min-w-0">
-            <div className="flex flex-col sticky left-0 z-50 flex-shrink-0">
+                         <div className="flex flex-col sticky left-0 z-50 flex-shrink-0 border-r border-gray-300 bg-white">
               <div
                 ref={timeColumnRef}
                 className="h-full overflow-y-auto overflow-x-hidden"
@@ -574,31 +584,18 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                 }}
               >
                 <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                {timeSlots.map((hour, i) => (
-                  <div key={i} className="flex w-20 h-18 flex-shrink-0">
-                    <div className="w-20 border-r border-gray-300 text-sm font-medium text-gray-900 flex items-center justify-end sticky left-0 z-50 bg-white flex-shrink-0"
-                         style={{ padding: '19px 12px 4px 10px' }}>
-                      <span className="mr-4 mt-5 whitespace-nowrap">{formatTime(hour)}</span>
-                      <div className="absolute right-0 bottom-0 w-5 h-px transform -translate-y-1/2">
-                        <svg 
-                          className="text-gray-600" 
-                          width="100%" 
-                          height="1" 
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <line 
-                            x1="0" 
-                            y1="0" 
-                            x2="100%" 
-                            y2="0" 
-                            stroke="oklch(87.2% 0.01 258.338)" 
-                            strokeWidth="2"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                                 {timeSlots.map((hour, i) => (
+                   <div key={i} className="w-20 h-18 flex-shrink-0 relative" style={{ overflow: 'visible', zIndex: 100 - i }}>
+                     <div className="w-20 h-full bg-white sticky left-0 relative" style={{ overflow: 'visible', zIndex: 44, paddingTop: '4px' }}>
+                       <span className="absolute text-sm font-medium whitespace-nowrap leading-none" style={{ bottom: '-7px', right: '32px', zIndex: 100, transform: 'translateY(-2px)', color: '#4B5563' }}>{formatTime(hour)}</span>
+                     </div>
+                     <div className="absolute bottom-0 right-0 w-full h-px" style={{ zIndex: 75 }}>
+                       <svg width="30%" height="2" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', marginLeft: 'auto' }}>
+                         <line x1="0" y1="1" x2="100%" y2="1" stroke="#E5E7EB" strokeWidth="2" />
+                       </svg>
+                     </div>
+                   </div>
+                 ))}
               </div>
             </div>
 
@@ -618,25 +615,28 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                 const isWeekend = dayIndex % 7 === 0 || dayIndex % 7 === 6;
 
                                  return (
-                   <div key={dayIndex} className={`flex flex-col border-r border-gray-200 relative w-full overflow-hidden min-w-0 ${
+                   <div key={dayIndex} className={`flex flex-col border-r border-gray-300 relative w-full overflow-hidden min-w-0 ${
                      isWeekend ? 'bg-gray-50' : 'bg-white'
                    }`}>
-                     <div className="min-w-full h-18 p-0 border-b border-gray-400 border-r  bg-gray-300 relative z-0"></div>
+                                                                                       <div className="min-w-full h-18 p-0 border-b border-r relative z-0" style={{ backgroundColor: '#F3F4F6', borderColor: '#E5E7EB' }}></div>
                     
-                    {timeSlots.map((hour, timeIndex) => {
-                                             let cellClasses = "min-w-full h-18 p-0 border-b border-gray-300 border-r border-gray-300 bg-white relative z-0 flex-shrink-0";
+                                                                                   {timeSlots.map((hour, timeIndex) => {
+                                               let cellClasses = "min-w-full h-18 p-0 border-b border-r bg-white relative z-0 flex-shrink-0";
+                                               const cellStyle = { borderColor: '#E5E7EB' };
 
-                       if (dayIndex % 7 >= 1 && dayIndex % 7 <= 5 && hour === 13) {
-                         cellClasses = `min-w-full h-18 p-0 border-b border-gray-300 border-r border-gray-300 relative z-0 flex-shrink-0 ${
-                           isWeekend ? 'bg-gray-300' : 'bg-white'
-                         }`;
-                       } else if (hour < 9 || hour >= 18) {
-                         cellClasses = "min-w-full h-18 p-0 border-b border-gray-400 border-r border-gray-400 bg-gray-300 relative z-0 flex-shrink-0";
-                       } else if (isWeekend) {
-                         cellClasses = "min-w-full h-18 p-0 border-b border-gray-400 border-r border-gray-400 bg-gray-300 relative z-0 flex-shrink-0";
-                       }
-
-                      const cellStyle = {};
+                                                                                               if (dayIndex % 7 >= 1 && dayIndex % 7 <= 5 && hour === 13) {
+                                                     cellClasses = `min-w-full h-18 p-0 border-b border-r relative z-0 flex-shrink-0 ${
+                            isWeekend ? 'bg-white' : 'bg-white'
+                          }`;
+                                                                         } else if (hour < 9 || hour >= 18) {
+                          cellClasses = "min-w-full h-18 p-0 border-b border-r relative z-0 flex-shrink-0";
+                          cellStyle.backgroundColor = '#F3F4F6';
+                        } else if (isWeekend) {
+                          cellClasses = "min-w-full h-18 p-0 border-b border-r relative z-0 flex-shrink-0";
+                          cellStyle.backgroundColor = '#F3F4F6';
+                          } else {
+                            cellClasses = "min-w-full h-18 p-0 border-b border-r bg-white relative z-0 flex-shrink-0";
+                          }
                       if (dayIndex % 7 >= 1 && dayIndex % 7 <= 5 && hour === 13) {
                         cellStyle.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(156, 163, 175, 0.4) 3px, rgba(156, 163, 175, 0.4) 6px)';
                       }

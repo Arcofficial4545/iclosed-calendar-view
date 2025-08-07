@@ -17,7 +17,7 @@ const timezoneOptions = [
       { value: 'Asia/Jakarta', label: 'Jakarta, Indonesia' },
       { value: 'Asia/Bangkok', label: 'Thailand - Indochina Time' },
       { value: 'Asia/Dubai', label: 'UAE - Gulf Standard Time' },
-      { value: 'Asia/Karachi', label: 'Pakistan Standard Time' }
+      { value: 'Asia/Karachi', label: 'Pak - Pakistan Standard Time' }
     ]
   },
   {

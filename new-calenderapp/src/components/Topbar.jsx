@@ -1,9 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import TimezoneBar from './TimezoneBar'
+import { 
+  getWeekStart, 
+  addDays, 
+  formatDate, 
+  formatShortDate, 
+  isCurrentDay, 
+  isSameMonth, 
+  getDaysInMonth 
+} from '../utils/dateUtils'
 
 const Topbar = ({
   currentDate,
   setCurrentDate,
+  calendarMonth,
+  setCalendarMonth,
   goToPreviousWeek,
   goToNextWeek,
   timezone,
@@ -11,40 +22,8 @@ const Topbar = ({
 }) => {
   // Simple state variables
   const [showCalendar, setShowCalendar] = useState(false)
-  const [calendarMonth, setCalendarMonth] = useState(currentDate)
 
-  // Simple function to get week start
-  const getWeekStart = (date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const result = new Date(date);
-    result.setDate(result.getDate() - day);
-    return result;
-  };
-
-  // Simple function to add days
-  const addDays = (date, days) => {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-  };
-
-  // Simple function to format date
-  const formatDate = (date) => {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    return `${month} ${year}`;
-  };
-
-  // Format date range to match design (Jan 19 to Jan 25, 2025)
-  const formatShortDate = (date) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const month = months[date.getMonth()];
-    const day = date.getDate();
-    const year = date.getFullYear();
-    return `${month} ${day}`;
-  };
+  // Calculate week start and end using shared utilities
 
   // Get year for date range display
   const getDateRangeYear = () => {
@@ -56,21 +35,7 @@ const Topbar = ({
   const weekStart = getWeekStart(currentDate);
   const weekEnd = addDays(weekStart, 6);
 
-  // Simple function to handle previous week
-  const handlePreviousWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() - 7);
-    setCurrentDate(newDate);
-    setCalendarMonth(newDate);
-  }
-
-  // Simple function to handle next week
-  const handleNextWeek = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + 7);
-    setCurrentDate(newDate);
-    setCalendarMonth(newDate);
-  }
+  // Navigation functions now use props from App.jsx (no duplicates needed)
 
   // Simple function to handle previous month
   const handlePreviousMonth = () => {
@@ -97,24 +62,7 @@ const Topbar = ({
     return date >= weekStart && date <= weekEnd;
   }
 
-  // Simple function to check if date is today
-  const isCurrentDay = (date) => {
-    const today = new Date();
-    return date.getDate() === today.getDate() && 
-           date.getMonth() === today.getMonth() && 
-           date.getFullYear() === today.getFullYear();
-  }
-
-  // Simple function to check if date is in current month
-  const isSameMonth = (date1, date2) => {
-    return date1.getMonth() === date2.getMonth() && 
-           date1.getFullYear() === date2.getFullYear();
-  }
-
-  // Simple function to get all days in month
-  const getDaysInMonth = (year, month) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
+  // Helper functions now imported from shared utilities
 
   // Simple function to render calendar
   const renderCalendar = () => {
@@ -218,7 +166,7 @@ const Topbar = ({
         <div className="text-lg font-semibold text-gray-900">{formatDate(currentDate)}</div>
 
         <button
-          onClick={handlePreviousWeek}
+          onClick={goToPreviousWeek}
           className="w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600 flex items-center justify-center flex-shrink-0"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +190,7 @@ const Topbar = ({
         </div>
 
         <button
-          onClick={handleNextWeek}
+          onClick={goToNextWeek}
           className="w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600 flex items-center justify-center flex-shrink-0"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

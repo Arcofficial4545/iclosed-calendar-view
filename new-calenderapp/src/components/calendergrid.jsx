@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import EventDetailPopup from './EventDetailPopup';
+import { getWeekStart, addDays, formatDay, formatTime } from '../utils/dateUtils';
 
 const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
   // Calendar scrolling and dragging state
@@ -50,40 +51,7 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
     return () => clearInterval(timer);
   }, [timezone]);
 
-  // Date and time formatting functions
-  const getWeekStart = (date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const result = new Date(date);
-    result.setDate(result.getDate() - day);
-    return result;
-  };
-
-  const addDays = (date, days) => {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-  };
-
-  const formatDay = (date) => {
-    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-    const dayIndex = date.getDay();
-    const dayNumber = date.getDate();
-    const formattedDayNumber = dayNumber < 10 ? `0${dayNumber}` : `${dayNumber}`;
-    return {
-      name: dayNames[dayIndex],
-      number: formattedDayNumber
-    };
-  };
-
-  const formatTime = (hour) => {
-    const date = new Date();
-    date.setHours(hour, 0, 0, 0);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      hour12: true
-    });
-  };
+  // Date and time formatting functions now imported from shared utilities
 
   // Convert event hours to display in selected timezone
   const getEventHourInTimezone = (eventHour) => {

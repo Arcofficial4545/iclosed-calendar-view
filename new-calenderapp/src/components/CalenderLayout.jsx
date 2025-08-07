@@ -7,6 +7,8 @@ import CalendarSidePanel from './CalendarSidePanel';
 const CalendarLayout = ({
   currentDate,
   setCurrentDate,
+  calendarMonth,
+  setCalendarMonth,
   goToPreviousWeek,
   goToNextWeek,
   timezone,
@@ -57,6 +59,8 @@ const CalendarLayout = ({
           <Topbar
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
+            calendarMonth={calendarMonth}
+            setCalendarMonth={setCalendarMonth}
             goToPreviousWeek={goToPreviousWeek}
             goToNextWeek={goToNextWeek}
             timezone={timezone}

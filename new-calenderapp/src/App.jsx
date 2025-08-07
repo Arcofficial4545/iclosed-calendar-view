@@ -44,6 +44,7 @@ function App() {
         setTimezone={setTimezone}
         selectedMembers={selectedMembers}
         setSelectedMembers={setSelectedMembers}
+        allMembers={allMembers}
       />
     </div>
   )

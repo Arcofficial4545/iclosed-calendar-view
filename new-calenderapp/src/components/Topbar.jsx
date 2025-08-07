@@ -20,51 +20,50 @@ const Topbar = ({
   timezone,
   setTimezone
 }) => {
-  // Simple state variables
   const [showCalendar, setShowCalendar] = useState(false)
 
-  // Calculate week start and end using shared utilities
-
-  // Get year for date range display
-  const getDateRangeYear = () => {
-    const year = weekEnd.getFullYear();
-    return year;
-  };
 
   // Calculate week start and end
   const weekStart = getWeekStart(currentDate);
   const weekEnd = addDays(weekStart, 6);
+  
+  // Get year for date range display
+  const getDateRangeYear = () => {
+    
+    const year = weekEnd.getFullYear();
+    return year;
+  };
+
 
   // Navigation functions now use props from App.jsx (no duplicates needed)
 
-  // Simple function to handle previous month
+  //  function to handle previous month
   const handlePreviousMonth = () => {
     const newDate = new Date(calendarMonth);
     newDate.setMonth(newDate.getMonth() - 1);
     setCalendarMonth(newDate);
   }
 
-  // Simple function to handle next month
+  //  function to handle next month
   const handleNextMonth = () => {
     const newDate = new Date(calendarMonth);
     newDate.setMonth(newDate.getMonth() + 1);
     setCalendarMonth(newDate);
   }
 
-  // Simple function to handle date selection
+  //  function to handle date selection
   const handleDateSelect = (date) => {
     setCurrentDate(date);
     setShowCalendar(false);
   }
 
-  // Simple function to check if date is in selected range
+  //  function to check if date is in selected range
   const isDateInSelectedRange = (date) => {
     return date >= weekStart && date <= weekEnd;
   }
 
-  // Helper functions now imported from shared utilities
 
-  // Simple function to render calendar
+  //  function to create/render calendar(from react big calnder)
   const renderCalendar = () => {
     const year = calendarMonth.getFullYear();
     const month = calendarMonth.getMonth();

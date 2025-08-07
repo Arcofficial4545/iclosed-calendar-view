@@ -2,8 +2,13 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import EventsDropdown from "./EventsDropdown"
 
-const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowClick, sidebarExpanded }) => {
-  // Simple state variables
+const CalendarSidePanel = ({ 
+ selectedMembers,
+ setSelectedMembers,
+ onBackArrowClick,
+ sidebarExpanded,
+ allMembers }) => {
+  //  state variables
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentOption, setCurrentOption] = useState('My Schedule');
   const [searchValue, setSearchValue] = useState('');
@@ -15,12 +20,7 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
   const [selectedAvailability, setSelectedAvailability] = useState('Default availabiliy');
   const [availabilitySearchValue, setAvailabilitySearchValue] = useState('');
 
-  // Simple arrays
-  const emails = [
-    "zack.bing@gmail.com",
-    "jane.doe@gmail.com",
-    "system@iclosed.io",
-  ];
+  //  arrays
 
   const members = [
     'Member 1',
@@ -35,11 +35,11 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
 
   const availabilityOptions = [
     { id: 'default', name: 'Default availabiliy', isDefault: true },
-    { id: 'long', name: 'Long name for availability sc...', isDefault: false },
+    { id: 'long', name: 'Long name for availability ', isDefault: false },
     { id: 'availability3', name: 'Availability 3', isDefault: false }
   ];
 
-  // Simple function to handle checkbox
+  //  function to handle checkbox
   const handleCheckbox = (email) => {
     if (selectedMembers.includes(email)) {
       const newMembers = selectedMembers.filter(item => item !== email);
@@ -50,14 +50,14 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
     }
   };
 
-  // Simple function to select member
+  //  function to select member
   const selectMember = (member) => {
     setCurrentOption(member);
     setShowDropdown(false);
     setSearchValue('');
   };
 
-  // Simple function to filter search results
+  //  function to filter search results
   const getSearchResults = () => {
     const results = [];
     for (let i = 0; i < members.length; i++) {
@@ -71,7 +71,7 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
 
   const searchResults = getSearchResults();
 
-  // Simple function to filter availability options
+  //  function to filter availability options
   const getFilteredAvailabilityOptions = () => {
     const results = [];
     for (let i = 0; i < availabilityOptions.length; i++) {
@@ -85,17 +85,17 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
 
   const filteredAvailabilityOptions = getFilteredAvailabilityOptions();
 
-  // Simple function to handle mouse enter
+  //  function to handle mouse enter
   const handleMouseEnter = () => {
     setShowAvailabilityPopup(true);
   };
 
-  // Simple function to handle mouse leave
+  //  function to handle mouse leave
   const handleMouseLeave = () => {
     setShowAvailabilityPopup(false);
   };
 
-  // Simple function to handle event selection change
+  //  function to handle event selection change
   const handleEventSelectionChange = (hasSpecificEvent) => {
     setIsSpecificEventSelected(hasSpecificEvent);
   };
@@ -384,7 +384,7 @@ const CalendarSidePanel = ({ selectedMembers, setSelectedMembers, onBackArrowCli
           <h3 className="font-medium text-gray-900 text-sm mb-2">Connected calendar(s)</h3>
           <p className="text-xs text-gray-500 mb-3">Checking for scheduling conflicts. Enable or disable event visibility.</p>
           <div className="space-y-2">
-            {emails.map((email, index) => (
+            {allMembers.map((email, index) => (
               <label
                 key={index}
                 className="flex items-center gap-2 text-sm cursor-pointer"

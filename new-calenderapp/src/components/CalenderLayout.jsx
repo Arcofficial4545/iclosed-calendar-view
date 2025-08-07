@@ -14,7 +14,8 @@ const CalendarLayout = ({
   timezone,
   setTimezone,
   selectedMembers,
-  setSelectedMembers
+  setSelectedMembers,
+  allMembers
 }) => {
   // Simple state variables
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(true);
@@ -39,7 +40,7 @@ const CalendarLayout = ({
 
       {/* Main content area */}
       <div className="flex-1 flex overflow-hidden h-screen">
-        {/* Side Panel */}
+        {/* calnderrSide Panel */}
         <div
           className={`transition-all duration-300 bg-white border-r border-gray-100
             ${isSidePanelOpen ? 'w-80' : 'w-0'} overflow-hidden`}
@@ -50,6 +51,7 @@ const CalendarLayout = ({
               setSelectedMembers={setSelectedMembers}
               onBackArrowClick={toggleSidePanel}
               sidebarExpanded={sidebarExpanded}
+              allMembers={allMembers}
             />
           )}
         </div>

@@ -33,6 +33,8 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
   const [events, setEvents] = useState([]);
   const [showBreakHourConfirm, setShowBreakHourConfirm] = useState(false);
   const [pendingBreakHourDrop, setPendingBreakHourDrop] = useState(null);
+  const [showDisallowedSlotConfirm, setShowDisallowedSlotConfirm] = useState(false);
+  const [pendingDisallowedSlotDrop, setPendingDisallowedSlotDrop] = useState(null);
 
   // DOM references for scrolling
   const scrollRef = useRef(null);
@@ -51,7 +53,7 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
     return () => clearInterval(timer);
   }, [timezone]);
 
-  // Date and time formatting functions now imported from shared utilities
+  
 
   // Convert event hours to display in selected timezone
   const getEventHourInTimezone = (eventHour) => {
@@ -318,59 +320,66 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
       if (wasDragged && dragEndPosition) {
         const isWeekend = dragEndPosition.dayIndex % 7 === 0 || dragEndPosition.dayIndex % 7 === 6;
         const isWorkingHours = dragEndPosition.hour >= 9 && dragEndPosition.hour < 18;
-        const isValidPosition = !isWeekend && isWorkingHours && !dragEndPosition.invalid;
+        const isDisallowedSlot = isWeekend || !isWorkingHours || dragEndPosition.hour === 13;
         
-        if (isValidPosition) {
-          // Calculate new event details
-          const newEventDay = dragEndPosition.dayIndex % 7;
-          const newEventStartHour = dragEndPosition.hour;
-          const newEventEndHour = dragEndPosition.hour + (draggedEvent.endHour - draggedEvent.startHour);
-          
-          // Check for event conflicts
-          const hasConflict = hasEventConflict(newEventDay, newEventStartHour, newEventEndHour, draggedEvent);
-          
-          if (hasConflict) {
-            // Don't allow drop if there's a conflict
-            return;
-          }
-          
-          // Check if this is a break hour (1 PM)
-          if (dragEndPosition.hour === 13) {
-            // Show confirmation dialog for break hour
-            setPendingBreakHourDrop({
-              draggedEvent,
-              dragStartPosition,
-              dragEndPosition
-            });
-            setShowBreakHourConfirm(true);
-          } else {
-            // Normal drop for non-break hours
-            const updatedEvents = [];
-            for (let i = 0; i < events.length; i++) {
-              const event = events[i];
-              if (!(event.day === dragStartPosition.dayIndex % 7 && 
-                    event.startHour === dragStartPosition.hour &&
-                    event.title === draggedEvent.title)) {
-                updatedEvents.push(event);
-              }
+        // Calculate new event details
+        const newEventDay = dragEndPosition.dayIndex % 7;
+        const newEventStartHour = dragEndPosition.hour;
+        const newEventEndHour = dragEndPosition.hour + (draggedEvent.endHour - draggedEvent.startHour);
+        
+        // Check for event conflicts
+        const hasConflict = hasEventConflict(newEventDay, newEventStartHour, newEventEndHour, draggedEvent);
+        
+        if (hasConflict) {
+          // Don't allow drop if there's a conflict
+          return;
+        }
+        
+        if (dragEndPosition.hour === 13) {
+          // Show confirmation dialog for break hour (original red dialog)
+          setPendingBreakHourDrop({
+            draggedEvent,
+            dragStartPosition,
+            dragEndPosition
+          });
+          setShowBreakHourConfirm(true);
+        } else if (isDisallowedSlot) {
+          // Show confirmation dialog for other disallowed slots (new yellow dialog)
+          setPendingDisallowedSlotDrop({
+            draggedEvent,
+            dragStartPosition,
+            dragEndPosition,
+            isWeekend,
+            isWorkingHours
+          });
+          setShowDisallowedSlotConfirm(true);
+        } else {
+          // Normal drop for allowed slots
+          const updatedEvents = [];
+          for (let i = 0; i < events.length; i++) {
+            const event = events[i];
+            if (!(event.day === dragStartPosition.dayIndex % 7 && 
+                  event.startHour === dragStartPosition.hour &&
+                  event.title === draggedEvent.title)) {
+              updatedEvents.push(event);
             }
-            
-            const newEvent = {
-              ...draggedEvent,
-              day: newEventDay,
-              startHour: newEventStartHour,
-              startMinutes: dragEndPosition.minutes || 0,
-              endHour: newEventEndHour,
-              endMinutes: dragEndPosition.minutes || 0,
-              title: draggedEvent.title,
-              time: `${formatTime(newEventStartHour)}:${dragEndPosition.minutes?.toString().padStart(2, '0') || '00'} - ${formatTime(newEventEndHour)}:${dragEndPosition.minutes?.toString().padStart(2, '0') || '00'}`,
-              type: draggedEvent.type,
-              status: draggedEvent.status
-            };
-            
-            updatedEvents.push(newEvent);
-            setEvents(updatedEvents);
           }
+          
+          const newEvent = {
+            ...draggedEvent,
+            day: newEventDay,
+            startHour: newEventStartHour,
+            startMinutes: dragEndPosition.minutes || 0,
+            endHour: newEventEndHour,
+            endMinutes: dragEndPosition.minutes || 0,
+            title: draggedEvent.title,
+            time: `${formatTime(newEventStartHour)}:${dragEndPosition.minutes?.toString().padStart(2, '0') || '00'} - ${formatTime(newEventEndHour)}:${dragEndPosition.minutes?.toString().padStart(2, '0') || '00'}`,
+            type: draggedEvent.type,
+            status: draggedEvent.status
+          };
+          
+          updatedEvents.push(newEvent);
+          setEvents(updatedEvents);
         }
       } else {
         setPopupEvent(draggedEvent);
@@ -540,6 +549,62 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
     setPendingBreakHourDrop(null);
   };
 
+  // Disallowed slot confirmation handlers
+  const handleDisallowedSlotConfirm = () => {
+    if (pendingDisallowedSlotDrop) {
+      const { draggedEvent, dragStartPosition, dragEndPosition } = pendingDisallowedSlotDrop;
+      
+      // Calculate new event details
+      const newEventDay = dragEndPosition.dayIndex % 7;
+      const newEventStartHour = dragEndPosition.hour;
+      const newEventEndHour = dragEndPosition.hour + (draggedEvent.endHour - draggedEvent.startHour);
+      
+      // Check for event conflicts
+      const hasConflict = hasEventConflict(newEventDay, newEventStartHour, newEventEndHour, draggedEvent);
+      
+      if (hasConflict) {
+        // Don't allow drop if there's a conflict
+        setShowDisallowedSlotConfirm(false);
+        setPendingDisallowedSlotDrop(null);
+        return;
+      }
+      
+      const updatedEvents = [];
+      for (let i = 0; i < events.length; i++) {
+        const event = events[i];
+        if (!(event.day === dragStartPosition.dayIndex % 7 && 
+              event.startHour === dragStartPosition.hour &&
+              event.title === draggedEvent.title)) {
+          updatedEvents.push(event);
+        }
+      }
+      
+      const newEvent = {
+        ...draggedEvent,
+        day: newEventDay,
+        startHour: newEventStartHour,
+        startMinutes: dragEndPosition.minutes || 0,
+        endHour: newEventEndHour,
+        endMinutes: dragEndPosition.minutes || 0,
+        title: draggedEvent.title,
+        time: `${formatTime(newEventStartHour)}:${dragEndPosition.minutes?.toString().padStart(2, '0') || '00'} - ${formatTime(newEventEndHour)}:${dragEndPosition.minutes?.toString().padStart(2, '0') || '00'}`,
+        type: draggedEvent.type,
+        status: draggedEvent.status
+      };
+      
+      updatedEvents.push(newEvent);
+      setEvents(updatedEvents);
+    }
+    
+    setShowDisallowedSlotConfirm(false);
+    setPendingDisallowedSlotDrop(null);
+  };
+
+  const handleDisallowedSlotCancel = () => {
+    setShowDisallowedSlotConfirm(false);
+    setPendingDisallowedSlotDrop(null);
+  };
+
   // Check if there's a conflict with existing events
   const hasEventConflict = (day, startHour, endHour, excludeEvent = null) => {
     for (let i = 0; i < events.length; i++) {
@@ -680,6 +745,46 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
             <button
               onClick={handleBreakHourConfirm}
               className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              Yes, Schedule Anyway
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Disallowed Slot Confirmation Dialog */}
+      {showDisallowedSlotConfirm && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl border border-gray-200 z-50">
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Outside Working Hours</h3>
+          </div>
+          
+          <p className="text-gray-700 mb-6">
+            {pendingDisallowedSlotDrop?.isWeekend 
+              ? "You're trying to schedule an event on a weekend. This time is typically outside regular working hours."
+              : "You're trying to schedule an event outside regular working hours (9:00 AM - 6:00 PM)."
+            }
+          </p>
+          
+          <p className="text-gray-700 mb-6">
+            Are you sure you want to schedule this event during this time?
+          </p>
+          
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={handleDisallowedSlotCancel}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDisallowedSlotConfirm}
+              className="px-4 py-2 text-sm font-medium text-white bg-yellow-600 border border-transparent rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
             >
               Yes, Schedule Anyway
             </button>
@@ -828,7 +933,7 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                           onMouseLeave={handleGrayAreaMouseLeave}
                         >
                           {events.map((event, eventIndex) => {
-                            if (event.day === dayIndex % 7 && hour >= event.startHour && hour < event.endHour && hour >= 9 && hour < 18 && !(isEventDragging && draggedEvent && event === draggedEvent)) {
+                            if (event.day === dayIndex % 7 && hour >= event.startHour && hour < event.endHour && !(isEventDragging && draggedEvent && event === draggedEvent)) {
                               const baseEventHeight = (event.endHour - event.startHour) * cellHeight;
                               const eventHeight = Math.max(baseEventHeight, 60);
                               const topOffset = (hour - event.startHour) * cellHeight;
@@ -842,7 +947,7 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                   height: `${eventHeight - 8}px`,
                                   padding: '4px 6px',
                                   overflow: 'hidden',
-                                  zIndex: 10,
+                                  zIndex: hour >= 18 ? 50 : 10, // Higher z-index for events after 6 PM
                                   width: 'calc(100% - 2px)',
                                   minWidth: '120px'
                                 };
@@ -904,7 +1009,7 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                             return null;
                           })}
                           
-                          {isEventDragging && dragPreview && dragPreview.day === dayIndex % 7 && hour >= dragPreview.startHour && hour < dragPreview.endHour && hour >= 9 && hour < 18 && hour === dragPreview.startHour && dragEndPosition && (
+                          {isEventDragging && dragPreview && dragPreview.day === dayIndex % 7 && hour >= dragPreview.startHour && hour < dragPreview.endHour && hour === dragPreview.startHour && dragEndPosition && (
                             <div 
                               className={`absolute left-0 right-0 h-1.5 transition-colors duration-150 ${
                                 dragPreview.invalid ? 'bg-red-500' : 'bg-green-500'
@@ -916,18 +1021,20 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                             />
                           )}
 
-                          {isEventDragging && dragPreview && dragPreview.day === dayIndex % 7 && hour >= dragPreview.startHour && hour < dragPreview.endHour && hour >= 9 && hour < 18 && hour === dragPreview.startHour && dragEndPosition && (
+                          {isEventDragging && dragPreview && dragPreview.day === dayIndex % 7 && hour >= dragPreview.startHour && hour < dragPreview.endHour && hour === dragPreview.startHour && dragEndPosition && (
                             <div 
                               className={`absolute rounded border-2 border-dashed select-none ${
                                 dragPreview.invalid 
                                   ? 'border-red-400 bg-red-100 bg-opacity-30' 
                                   : dragPreview.startHour === 13
                                     ? 'border-red-400 bg-red-50 bg-opacity-50'
-                                    : dragPreview.source === 'iclosed'
-                                      ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
-                                        ? 'border-orange-300 bg-orange-100 bg-opacity-30'
-                                        : 'border-blue-300 bg-blue-100 bg-opacity-30'
-                                      : 'border-gray-300 bg-gray-100 bg-opacity-30'
+                                    : (dragPreview.startHour < 9 || dragPreview.startHour >= 18 || dragPreview.day === 0 || dragPreview.day === 6)
+                                      ? 'border-yellow-400 bg-yellow-50 bg-opacity-50'
+                                      : dragPreview.source === 'iclosed'
+                                        ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
+                                          ? 'border-orange-300 bg-orange-100 bg-opacity-30'
+                                          : 'border-blue-300 bg-blue-100 bg-opacity-30'
+                                        : 'border-gray-300 bg-gray-100 bg-opacity-30'
                               }`}
                               style={{
                                 top: `${4 + (dragPreview.startMinutes || 0) * (cellHeight / 60)}px`,
@@ -956,11 +1063,13 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                     ? 'text-red-700' 
                                     : dragPreview.startHour === 13
                                       ? 'text-red-800'
-                                      : dragPreview.source === 'iclosed'
-                                        ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
-                                          ? 'text-orange-800'
-                                          : 'text-blue-800'
-                                        : 'text-gray-800'
+                                      : (dragPreview.startHour < 9 || dragPreview.startHour >= 18 || dragPreview.day === 0 || dragPreview.day === 6)
+                                        ? 'text-yellow-800'
+                                        : dragPreview.source === 'iclosed'
+                                          ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
+                                            ? 'text-orange-800'
+                                            : 'text-blue-800'
+                                          : 'text-gray-800'
                                 }`}>
                                   {dragPreview.title}
                                 </div>
@@ -970,11 +1079,13 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                   ? 'text-red-600' 
                                   : dragPreview.startHour === 13
                                     ? 'text-red-700'
-                                    : dragPreview.source === 'iclosed'
-                                      ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
-                                        ? 'text-orange-700'
-                                        : 'text-blue-700'
-                                      : 'text-gray-600'
+                                    : (dragPreview.startHour < 9 || dragPreview.startHour >= 18 || dragPreview.day === 0 || dragPreview.day === 6)
+                                      ? 'text-yellow-700'
+                                      : dragPreview.source === 'iclosed'
+                                        ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
+                                          ? 'text-orange-700'
+                                          : 'text-blue-700'
+                                        : 'text-gray-600'
                               }`}>
                                 {`${formatTime(dragPreview.startHour)}:${(dragPreview.startMinutes || 0).toString().padStart(2, '0')} - ${formatTime(dragPreview.endHour)}:${(dragPreview.endMinutes || 0).toString().padStart(2, '0')}`}
                               </div>
@@ -983,11 +1094,13 @@ const CalendarGrid = ({ currentDate = new Date(), timezone = 'UTC' }) => {
                                   ? 'text-red-600' 
                                   : dragPreview.startHour === 13
                                     ? 'text-red-700'
-                                    : dragPreview.source === 'iclosed'
-                                      ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
-                                        ? 'text-orange-700'
-                                        : 'text-blue-700'
-                                      : 'text-gray-600'
+                                    : (dragPreview.startHour < 9 || dragPreview.startHour >= 18 || dragPreview.day === 0 || dragPreview.day === 6)
+                                      ? 'text-yellow-700'
+                                      : dragPreview.source === 'iclosed'
+                                        ? (dragPreview.type === 'workshop' || dragPreview.type === 'session' || dragPreview.title.includes('Workshop') || dragPreview.title.includes('Session'))
+                                          ? 'text-orange-700'
+                                          : 'text-blue-700'
+                                        : 'text-gray-600'
                               }`}>
                                 {dragPreview.status === 'busy' ? 'Busy' : 'Available'}
                               </div>
